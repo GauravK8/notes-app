@@ -1,8 +1,17 @@
-.notes-container{
+.notes-container {
   min-height: 500px;
   .note-body {
     max-height: 5rem;
     overflow-x: auto;
     margin-bottom: 0;
+  }
+  .edit-icon {
+    display: inline-block;
+    transform: rotateZ(90deg);
+    cursor: pointer;
+    opacity: 0.75;
+    &:hover {
+      opacity: 1;
+    }
   }
 }

@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
+import { addNote, editNote, deleteNote } from "../../redux/actions/Notes";
+import { logout } from "../../redux/actions/User";
 import "./index.scss";
 
-const Note = ({ note, deleteNote }) => {
+const Note = ({ note, deleteNote, editNote }) => {
   return (
     <div className="card mb-2">
       <div className="card-body">
         <div className="d-flex justify-content-between align-items-start">
           <h5 className="card-title">{note.title}</h5>
-          <button
-            type="button"
-            className="close"
-            aria-label="Close"
-            onClick={deleteNote}
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <span>
+            <span className="edit-icon mr-2" title="Edit" onClick={editNote}>
+              &#9998;
+            </span>
+            <button
+              type="button"
+              className="close"
+              aria-label="Close"
+              title="Delete"
+              onClick={deleteNote}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </span>
         </div>
 
         <p className="note-body">{note.body}</p>
@@ -26,8 +36,17 @@ const Note = ({ note, deleteNote }) => {
 const Notes = () => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [noteId, setNoteId] = useState(-1);
   const [notes, setNotes] = useState([]);
   const [error, setError] = useState("");
+
+  const dispatch = useDispatch();
+  const allNotes = useSelector((state) => state.Note.notes);
+  const isAuthenticated = useSelector((state) => state.User?.isAuthenticated);
+
+  useEffect(() => {
+    setNotes(allNotes);
+  }, [allNotes]);
 
   const handleAddNote = () => {
     if (title === "") {
@@ -36,25 +55,62 @@ const Notes = () => {
         setError("");
       }, 3000);
     } else {
-      setNotes([...notes, { title: title, body: body }]);
+      const note = { title: title, body: body };
+      if (noteId > -1) {
+        dispatch(editNote(note, noteId));
+      } else {
+        dispatch(addNote(note));
+      }
       setTitle("");
       setBody("");
+      setNoteId(-1);
     }
   };
-  const deleteNote = (index) => {
-    setNotes([...notes.filter((_, i) => i !== index)]);
+
+  const handleDeleteNote = (index) => {
+    dispatch(deleteNote(index));
+    setTitle("");
+    setBody("");
+    setNoteId(-1);
   };
+
+  const handleEditNote = (note, index) => {
+    setTitle(note.title);
+    setBody(note.body);
+    setNoteId(index);
+  };
+
+  const handleCancelEditNote = () => {
+    setTitle("");
+    setBody("");
+    setNoteId(-1);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
+  if (!isAuthenticated) {
+    return <Redirect to="/" />;
+  }
+
   return (
     <section className="notes-container">
-      <h3>G Notes</h3>
+      <div className="d-flex justify-content-between">
+        <h3>G Notes</h3>
+        <button className="btn btn-link" title="Logout" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
 
-      <div className="row border">
+      <div className="row border ml-0 mr-0">
         <div className="col-3 p-3 border-right">
           {notes.map((note, index) => (
             <Note
               note={note}
               key={index}
-              deleteNote={() => deleteNote(index)}
+              deleteNote={() => handleDeleteNote(index)}
+              editNote={() => handleEditNote(note, index)}
             />
           ))}
         </div>
@@ -83,11 +139,23 @@ const Notes = () => {
               onChange={(e) => setBody(e.target.value)}
             />
             <footer className="d-flex justify-content-end">
+              {noteId > 0 && (
+                <button
+                  className="btn btn-default ml-auto"
+                  title="Cancel editing note !"
+                  onClick={handleCancelEditNote}
+                >
+                  Cancel
+                </button>
+              )}
               <button
-                className="btn btn-primary ml-auto"
+                className={`btn btn-primary ${
+                  noteId > 0 ? "ml-2" : "ml-auto"
+                } ${title === "" && "disabled"}`}
+                title={title === "" ? "Title is mandatory" : "Save"}
                 onClick={handleAddNote}
               >
-                Save
+                {noteId > 0 ? "Update" : "Save"}
               </button>
             </footer>
           </div>

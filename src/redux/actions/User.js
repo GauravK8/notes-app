@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS } from "./Types";
+import { LOGIN_SUCCESS, LOGOUT_SUCCESS } from "./Types";
 
 export const login = (username, password) => (dispatch) => {
   return new Promise((resolve, reject) => {
@@ -12,5 +12,14 @@ export const login = (username, password) => (dispatch) => {
     } else {
       reject();
     }
+  });
+};
+
+export const logout = () => (dispatch) => {
+  return new Promise((resolve, reject) => {
+    dispatch({
+      type: LOGOUT_SUCCESS,
+    });
+    resolve();
   });
 };

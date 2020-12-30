@@ -36,7 +36,7 @@ const Login = () => {
   }
 
   return (
-    <div className="d-flex flex-column col-3">
+    <div className="d-flex flex-column align-items-center justify-content-center">
       <h3>Login</h3>
       {error && (
         <div className="alert alert-danger" role="alert">

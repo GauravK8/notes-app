@@ -1,0 +1,8 @@
+.notes-container{
+  min-height: 500px;
+  .note-body {
+    max-height: 5rem;
+    overflow-x: auto;
+    margin-bottom: 0;
+  }
+}
